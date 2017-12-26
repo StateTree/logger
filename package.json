@@ -40,5 +40,8 @@
   },
   "files": [
     "lib"
-  ]
+  ],
+  "dependencies": {
+    "diff": "git+http://github.com/StateTree/diff.git"
+  }
 }
