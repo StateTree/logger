@@ -29,10 +29,11 @@ function applyDiff(steps) {
 };
 
 export default class Logger {
-	constructor(diffMethod, saveCallback){
+	constructor(saveCallback){
 		this.context;
 		this.getter;
 		this.setter;
+		this.diffMethod;
 
 		this.undoLog = [];
 		this.redoLog = [];
@@ -40,14 +41,13 @@ export default class Logger {
 		this.prevState = null;
 		this.nextId = 0;
 
-		this.diffMethod = diffMethod;
 		this.saveDiffCallback = saveCallback;
 
 		this.enable = true;
 	}
 }
 
-Logger.prototype.setContext = function(context, getter, setter){
+Logger.prototype.setContext = function(context, getter, setter, diffMethod){
 	if(!getter){
 		console.warn('Context getter function is required');
 		return;
@@ -60,6 +60,7 @@ Logger.prototype.setContext = function(context, getter, setter){
 	this.context = context;
 	this.getter = getter;
 	this.setter = setter;
+	this.diffMethod = diffMethod;
 	this.prevState = getter.call(context);
 };
 
