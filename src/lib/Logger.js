@@ -25,7 +25,9 @@ function applyDiff(steps) {
 		}
 		// now after reaching the Log entry apply the diff to current state
 		setter.call(context, diff);
+		return true;
 	}
+	return false;
 };
 
 export default class Logger {
@@ -43,6 +45,7 @@ export default class Logger {
 
 		this.saveDiffCallback = saveCallback;
 
+		this.diffApplied = false;
 		this.enable = true;
 	}
 }
@@ -76,17 +79,22 @@ Logger.prototype.undo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	applyDiff.call(this, -steps, callback);
+	this.diffApplied = applyDiff.call(this, -steps, callback);
 };
 
 Logger.prototype.redo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	applyDiff.call(this, steps, callback);
+	this.diffApplied = applyDiff.call(this, steps, callback);
 };
 
 Logger.prototype.save = function(){
+	if(this.diffApplied){
+		this.diffApplied = false;
+		return;
+	}
+
 	if(this.enable){
 		let log;
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
