@@ -3,7 +3,7 @@ import LogEntry from './LogEntry';
 
 function applyDiff(steps) {
 	const {context, undoLog, redoLog, getter, setter} = this;
-	let { prevState } = this;
+	let { prevState, diffApplied } = this;
 	const absSteps = Math.abs(steps);
 	let stepsRemaining = Math.min(absSteps, steps < 0 ? undoLog.length : redoLog.length);
 	if (stepsRemaining > 0) {
@@ -23,11 +23,11 @@ function applyDiff(steps) {
 				prevState = getter.call(context);
 			}
 		}
+		diffApplied = true;
 		// now after reaching the Log entry apply the diff to current state
 		setter.call(context, diff);
-		return true;
 	}
-	return false;
+	diffApplied = false;
 };
 
 export default class Logger {
@@ -79,20 +79,22 @@ Logger.prototype.undo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	this.diffApplied = applyDiff.call(this, -steps, callback);
+	applyDiff.call(this, -steps, callback);
 };
 
 Logger.prototype.redo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	this.diffApplied = applyDiff.call(this, steps, callback);
+	applyDiff.call(this, steps, callback);
 };
 
-Logger.prototype.save = function(){
-	if(this.diffApplied){
-		this.diffApplied = false;
-		return;
+Logger.prototype.save = function(ignoreDiffApplied = false){
+	if(!ignoreDiffApplied){
+		if(this.diffApplied){
+			this.diffApplied = false;
+			return;
+		}
 	}
 
 	if(this.enable){
