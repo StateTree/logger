@@ -3,7 +3,7 @@ import LogEntry from './LogEntry';
 
 function applyDiff(steps) {
 	const {context, undoLog, redoLog, getter, setter} = this;
-	let { prevState, diffApplied } = this;
+	let { prevState } = this;
 	const absSteps = Math.abs(steps);
 	let stepsRemaining = Math.min(absSteps, steps < 0 ? undoLog.length : redoLog.length);
 	if (stepsRemaining > 0) {
@@ -23,11 +23,13 @@ function applyDiff(steps) {
 				prevState = getter.call(context);
 			}
 		}
-		diffApplied = true;
+		// since primitive are immutable we don't call them in spread declaration above
+		this.diffApplied = true;
 		// now after reaching the Log entry apply the diff to current state
 		setter.call(context, diff);
 	}
-	diffApplied = false;
+	// since primitive are immutable we don't call them in spread declaration above
+	this.diffApplied = false;
 };
 
 export default class Logger {
