@@ -19,19 +19,19 @@ logger.setContext(obj,obj.getValue, obj.setValue);
 
 
 obj.setValue(1);
-logger.save();
+logger.save(true);
 
 obj.setValue(2);
-logger.save();
+logger.save(true);
 
 obj.setValue(3);
-logger.save();
+logger.save(true);
 
 obj.setValue(4);
-logger.save();
+logger.save(true);
 
 obj.setValue(5);
-logger.save();
+logger.save(true);
 
 console.log('Before Undo 2 Steps: ', obj.value);
 logger.undo(2);
