@@ -1,7 +1,7 @@
 import diff from 'diff';
 import LogEntry from './LogEntry';
 
-function applyDiff(steps) {
+function applyDiff(steps, callback) {
 	const {context, undoLog, redoLog, getter, setter} = this;
 	let { prevState } = this;
 	const absSteps = Math.abs(steps);
@@ -26,7 +26,7 @@ function applyDiff(steps) {
 		// since primitive are immutable we don't call them in spread declaration above
 		this.diffApplied = true;
 		// now after reaching the Log entry apply the diff to current state
-		setter.call(context, diff);
+		setter.call(context, diff, callback);
 	}
 	// since primitive are immutable we don't call them in spread declaration above
 	this.diffApplied = false;
