@@ -91,12 +91,10 @@ Logger.prototype.redo = function(steps, callback){
 	applyDiff.call(this, steps, callback);
 };
 
-Logger.prototype.save = function(ignoreDiffApplied = false){
-	if(!ignoreDiffApplied){
-		if(this.diffApplied){
-			this.diffApplied = false;
-			return;
-		}
+Logger.prototype.save = function(){
+	if(this.diffApplied){
+		this.diffApplied = false;
+		return;
 	}
 
 	if(this.enable){
