@@ -27,9 +27,11 @@ function applyDiff(steps, callback) {
 		this.diffApplied = true;
 		// now after reaching the Log entry apply the diff to current state
 		setter.call(context, diff, callback);
+	} else {
+		// since primitive are immutable we don't call them in spread declaration above
+		this.diffApplied = false;
 	}
-	// since primitive are immutable we don't call them in spread declaration above
-	this.diffApplied = false;
+
 };
 
 export default class Logger {
