@@ -20,7 +20,7 @@ function applyDiff(steps, callback) {
 			}
 
 			if (stepsRemaining === 0) {
-				prevState = getter.call(context);
+				this.prevState = diff.value;
 			}
 		}
 		// since primitive are immutable we don't call them in spread declaration above
