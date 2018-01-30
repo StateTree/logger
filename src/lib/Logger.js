@@ -108,6 +108,10 @@ Logger.prototype.save = function(){
 			// Change occurred log them
 			if (diffObject.current !== undefined) {
 				log = new LogEntry(this.nextId++, diffObject.current, diffObject.prev);
+				if(this.redoLog.length !== 0){
+					const nextLog = this.redoLog[0];
+					nextLog.prev = log.next;
+				}
 				this.undoLog.push(log);
 				this.prevState = state;
 			}
