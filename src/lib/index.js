@@ -1,4 +1,8 @@
 import Logger from './Logger';
+import ListLogger from './ListLogger';
 
-export default Logger;
+export {
+	Logger as default,
+	ListLogger
+};
 
