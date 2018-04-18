@@ -2,8 +2,7 @@ import diff from 'diff';
 import PivotedLinkedList from 'pivoted-linked-list';
 
 function applyDiff(steps, callback) {
-	const {context, logList, getter, setter} = this;
-	let { prevState } = this;
+	const {context, logList, setter} = this;
 
 	const listEntry = logList.shiftPivot(steps);
 
@@ -75,6 +74,13 @@ ListLogger.prototype.save = function(){
 		}
 		this.saveDiffCallback && this.saveDiffCallback(diff);
 	}
+};
+
+ListLogger.prototype.getCurrentLog = function(){
+	if(this.logList ){
+		return this.logList.getPivotElement();
+	}
+	return null;
 };
 
 
