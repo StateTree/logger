@@ -67,9 +67,9 @@ ListLogger.prototype.save = function(){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
 			const state = this.getter.call(this.context);
-			const diff = getDiff(this.prevState, state).value;
+			const diff = getDiff(this.prevState, state);
 
-			if (diff !== undefined) { // Change occurred log them
+			if (diff.value !== undefined) { // Change occurred log them
 				this.logList.insert(diff);
 			}
 		}
