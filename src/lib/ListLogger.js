@@ -8,7 +8,7 @@ function applyDiff(steps, callback) {
 	const diffObject = listEntry.element;
 
 	// now after reaching the Log entry apply the diff to current state
-	setter.call(context, diffObject, callback);
+	setter.call(context, diffObject.value, callback);
 };
 
 export default class ListLogger {
