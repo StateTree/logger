@@ -5,9 +5,10 @@ function applyDiff(steps, callback) {
 	const {context, logList, setter} = this;
 
 	const listEntry = logList.shiftPivot(steps);
+	const diffObject = listEntry.element;
 
 	// now after reaching the Log entry apply the diff to current state
-	setter.call(context, listEntry.element, callback);
+	setter.call(context, diffObject, callback);
 };
 
 export default class ListLogger {
@@ -66,7 +67,7 @@ ListLogger.prototype.save = function(){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
 			const state = this.getter.call(this.context);
-			const diff = getDiff(this.prevState, state).current;
+			const diff = getDiff(this.prevState, state).value;
 
 			if (diff !== undefined) { // Change occurred log them
 				this.logList.insert(diff);
