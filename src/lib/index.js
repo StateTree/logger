@@ -1,8 +1,8 @@
 import Logger from './Logger';
-import ListLogger from './ListLogger';
+import DiffLogger from './DiffLogger';
 
 export {
 	Logger as default,
-	ListLogger
+	DiffLogger
 };
 

@@ -1,5 +1,5 @@
 import Logger from './../lib';
-import {ListLogger} from './../lib';
+import {DiffLogger} from './../lib';
 
 var obj = {
 	value: 0,
@@ -15,7 +15,7 @@ function saveCallback(log){
 	console.log(log)
 }
 
-var logger = new ListLogger(null,saveCallback);
+var logger = new DiffLogger(null,saveCallback);
 logger.setContext(obj,obj.getValue, obj.setValue);
 
 

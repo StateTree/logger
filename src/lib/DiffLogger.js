@@ -1,17 +1,19 @@
 import diff from 'diff';
 import PivotedLinkedList from 'pivoted-linked-list';
 
-function applyDiff(steps, callback) {
-	const {context, logList, setter} = this;
+function shiftAndApplyLog(steps, callback) {
+	const {context, logList, setter } = this;
 
-	const listEntry = logList.shiftPivot(steps);
-	const diffObject = listEntry.element;
+	const logEntry = logList.shiftPivot(steps);
+	const diffObject = logEntry.element;
+	const diffState = diffObject.value;
 
-	// now after reaching the Log entry apply the diff to current state
-	setter.call(context, diffObject.value, callback);
+
+	this.prevDiffState = diffState;
+	setter.call(context, diffState, callback);
 };
 
-export default class ListLogger {
+export default class DiffLogger {
 	constructor(saveCallback){
 		this.context;
 		this.getter;
@@ -21,10 +23,11 @@ export default class ListLogger {
 		this.logList = new PivotedLinkedList([]);
 		this.saveDiffCallback = saveCallback;
 		this.enable = true;
+		this.prevDiffState = undefined;
 	}
 }
 
-ListLogger.prototype.setContext = function(context, getter, setter, diffMethod){
+DiffLogger.prototype.setContext = function(context, getter, setter, diffMethod){
 	if(!getter){
 		console.warn('Context getter function is required');
 		return;
@@ -40,34 +43,34 @@ ListLogger.prototype.setContext = function(context, getter, setter, diffMethod){
 	this.diffMethod = diffMethod;
 };
 
-ListLogger.prototype.setSaveCallback = function(saveCallback){
+DiffLogger.prototype.setSaveCallback = function(saveCallback){
 	this.saveDiffCallback = saveCallback
 };
 
-ListLogger.prototype.removeSaveCallback = function(){
+DiffLogger.prototype.removeSaveCallback = function(){
 	this.saveDiffCallback = null;
 };
 
-ListLogger.prototype.undo = function(steps, callback){
+DiffLogger.prototype.undo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	applyDiff.call(this, -steps, callback);
+	shiftAndApplyLog.call(this, -steps, callback);
 };
 
-ListLogger.prototype.redo = function(steps, callback){
+DiffLogger.prototype.redo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	applyDiff.call(this, steps, callback);
+	shiftAndApplyLog.call(this, steps, callback);
 };
 
-ListLogger.prototype.save = function(){
+DiffLogger.prototype.save = function(){
 	if(this.enable){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
 			const state = this.getter.call(this.context);
-			const diff = getDiff(this.prevState, state);
+			const diff = getDiff(this.prevDiffState, state);
 
 			if (diff.value !== undefined) { // Change occurred log them
 				this.logList.insert(diff);
@@ -77,7 +80,9 @@ ListLogger.prototype.save = function(){
 	}
 };
 
-ListLogger.prototype.getCurrentLog = function(){
+
+
+DiffLogger.prototype.getCurrentLog = function(){
 	if(this.logList ){
 		return this.logList.getPivotElement();
 	}
