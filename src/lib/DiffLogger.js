@@ -8,8 +8,6 @@ function shiftAndApplyLog(steps, callback) {
 	const diffObject = logEntry.element;
 	const diffState = diffObject.value;
 
-
-	this.prevDiffState = diffState;
 	setter.call(context, diffState, callback);
 };
 
@@ -23,7 +21,6 @@ export default class DiffLogger {
 		this.logList = new PivotedLinkedList([]);
 		this.saveDiffCallback = saveCallback;
 		this.enable = true;
-		this.prevDiffState = undefined;
 	}
 }
 
@@ -70,7 +67,9 @@ DiffLogger.prototype.save = function(){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
 			const state = this.getter.call(this.context);
-			const diff = getDiff(this.prevDiffState, state);
+			const currentDiff = this.getCurrentDiff();
+			const currentState = currentDiff.value;
+			const diff = getDiff(currentState, state);
 
 			if (diff.value !== undefined) { // Change occurred log them
 				this.logList.insert(diff);
@@ -81,6 +80,10 @@ DiffLogger.prototype.save = function(){
 };
 
 
+DiffLogger.prototype.getCurrentDiff = function(){
+	const logEntry = this.getCurrentLog();
+	return logEntry.element;
+}
 
 DiffLogger.prototype.getCurrentLog = function(){
 	if(this.logList ){
