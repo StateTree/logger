@@ -14,7 +14,6 @@ function shiftAndApplyLog(steps, callback) {
 export default class DiffLogger {
 	constructor(saveCallback){
 		this.context;
-		this.getter;
 		this.setter;
 		this.diffMethod;
 
@@ -24,18 +23,14 @@ export default class DiffLogger {
 	}
 }
 
-DiffLogger.prototype.setContext = function(context, getter, setter, diffMethod){
-	if(!getter){
-		console.warn('Context getter function is required');
-		return;
-	}
+DiffLogger.prototype.setContext = function(context, setter, diffMethod){
+
 
 	if(!setter){
 		console.warn('Context setter function is required');
 		return;
 	}
 	this.context = context;
-	this.getter = getter;
 	this.setter = setter;
 	this.diffMethod = diffMethod;
 };
@@ -66,10 +61,9 @@ DiffLogger.prototype.save = function(){
 	if(this.enable){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
-			const state = this.getter.call(this.context);
 			const currentDiff = this.getCurrentLog();
-			const currentState = currentDiff ? currentDiff.value : undefined;
-			const diff = getDiff(currentState, state);
+			const state = currentDiff ? currentDiff.previous : undefined;
+			const diff = getDiff(state);
 
 			if (diff.value !== undefined) { // Change occurred log them
 				this.logList.insert(diff);
