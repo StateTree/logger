@@ -67,7 +67,7 @@ DiffLogger.prototype.save = function(){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
 			const state = this.getter.call(this.context);
-			const currentDiff = this.getCurrentDiff();
+			const currentDiff = this.getCurrentLog();
 			const currentState = currentDiff ? currentDiff.value : undefined;
 			const diff = getDiff(currentState, state);
 
@@ -79,11 +79,6 @@ DiffLogger.prototype.save = function(){
 	}
 };
 
-
-DiffLogger.prototype.getCurrentDiff = function(){
-	const logEntry = this.getCurrentLog();
-	return logEntry ? logEntry.element : null;
-}
 
 DiffLogger.prototype.getCurrentLog = function(){
 	if(this.logList ){
