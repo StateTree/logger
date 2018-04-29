@@ -62,8 +62,8 @@ DiffLogger.prototype.save = function(){
 		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		if(this.context){
 			const currentDiff = this.getCurrentLog();
-			const state = currentDiff ? currentDiff.previous : undefined;
-			const diff = getDiff(state);
+			const currentDiffValue = currentDiff ? currentDiff.value : undefined;
+			const diff = getDiff(currentDiffValue);
 
 			if (diff.value !== undefined) { // Change occurred log them
 				this.logList.insert(diff);
