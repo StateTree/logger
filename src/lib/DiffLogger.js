@@ -82,7 +82,7 @@ DiffLogger.prototype.save = function(){
 
 DiffLogger.prototype.getCurrentDiff = function(){
 	const logEntry = this.getCurrentLog();
-	return logEntry.element;
+	return logEntry ? logEntry.element : null;
 }
 
 DiffLogger.prototype.getCurrentLog = function(){
