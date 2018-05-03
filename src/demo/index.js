@@ -3,10 +3,10 @@ import {DiffLogger} from './../lib';
 
 var obj = {
 	value: 0,
-	getValue: function(){
+	getState: function(){
 		return this.value;
 	},
-	setValue: function(val){
+	setState: function(val){
 		this.value = val;
 	}
 }
@@ -15,23 +15,22 @@ function saveCallback(log){
 	console.log(log)
 }
 
-var logger = new DiffLogger(null,saveCallback);
-logger.setContext(obj,obj.getValue, obj.setValue);
+var logger = new DiffLogger(obj,saveCallback);
 
 
-obj.setValue(1);
+obj.setState(1);
 logger.save(true);
 
-obj.setValue(2);
+obj.setState(2);
 logger.save(true);
 
-obj.setValue(3);
+obj.setState(3);
 logger.save(true);
 
-obj.setValue(4);
+obj.setState(4);
 logger.save(true);
 
-obj.setValue(5);
+obj.setState(5);
 logger.save(true);
 
 logger.undo();
@@ -61,7 +60,7 @@ console.log('After Undo 2 Steps: ', obj.value);
 logger.redo(2);
 console.log('After Redo 2 Steps: ', obj.value);
 
-obj.setValue(6);
+obj.setState(6);
 logger.save(true);
 
 logger.undo();
