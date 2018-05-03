@@ -1,4 +1,3 @@
-import diff from 'diff';
 import PivotedLinkedList from 'pivoted-linked-list';
 
 function shiftAndApplyLog(steps, callback) {
@@ -29,6 +28,10 @@ export default class DiffLogger {
 
 		if(!context.getState){
 			console.error("Context needs to implement getState method");
+		}
+
+		if(!context.getDiff){
+			console.error("Context needs to implement getDiff method");
 		}
 
 		this.context = context;
@@ -69,12 +72,9 @@ DiffLogger.prototype.redo = function(steps, callback){
 
 DiffLogger.prototype.save = function(){
 	if(this.enable){
-		let getDiff = this.diffMethod ? this.diffMethod : diff;
 		let diffValue;
 		if(this.context){
-			//to-do getState Could be expensive process, if tree is big
-			const currentState = this.context.getState();
-			diffValue = getDiff(this.lastActiveState, currentState);
+			diffValue = this.context.getDiff(this.lastActiveState);
 
 			if (diffValue !== undefined) { // Change occurred log them
 				this.logList.insert(diffValue);
