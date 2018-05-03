@@ -1,3 +1,4 @@
+import diff from 'diff';
 import Logger from './../lib';
 import {DiffLogger} from './../lib';
 
@@ -8,8 +9,13 @@ var obj = {
 	},
 	setState: function(val){
 		this.value = val;
+	},
+	getDiff: function(value){
+		return diff(value,this.getState())
 	}
 }
+
+
 
 function saveCallback(log){
 	console.log(log)
