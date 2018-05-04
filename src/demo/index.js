@@ -10,6 +10,9 @@ var obj = {
 	setState: function(val){
 		this.value = val;
 	},
+	applyDiff: function(val){
+		this.value = val;
+	},
 	getDiff: function(value){
 		return diff(value,this.getState())
 	}

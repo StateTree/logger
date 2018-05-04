@@ -6,7 +6,7 @@ function shiftAndApplyLog(steps, callback) {
 	const diffState = logEntry.element; //State as JSON
 	const diffValue = diffState ? diffState.value : undefined;
 	const diffLoggerInstance = this;
-	context.setState.call(context, diffValue, function(){
+	context.applyDiff.call(context, diffValue, function(){
 		updateLastActiveState.call(diffLoggerInstance);
 		callback()
 	});
@@ -23,8 +23,8 @@ export default class DiffLogger {
 			console.error("Context cant be null");
 		}
 
-		if(!context.setState){
-			console.error("Context needs to implement setState method");
+		if(!context.applyDiff){
+			console.error("Context needs to implement applyDiff method");
 		}
 
 		if(!context.getState){
