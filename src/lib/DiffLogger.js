@@ -3,7 +3,8 @@ import PivotedLinkedList from 'pivoted-linked-list';
 function shiftAndApplyLog(steps, callback) {
 	const {context, logList } = this;
 	const logEntry = logList.shiftPivot(steps);
-	const diffValue = logEntry.element;
+	const diffState = logEntry.element; //State as JSON
+	const diffValue = diffState ? diffState.value : undefined;
 	const diffLoggerInstance = this;
 	context.setState.call(context, diffValue, function(){
 		updateLastActiveState.call(diffLoggerInstance);
