@@ -18,7 +18,7 @@ function updateLastActiveState(){
 }
 
 export default class DiffLogger {
-	constructor(context,saveCallback){
+	constructor(context){
 		if(!context){
 			console.error("Context cant be null");
 		}
@@ -38,7 +38,7 @@ export default class DiffLogger {
 		this.context = context;
 
 		this.logList = new PivotedLinkedList([]);
-		this.saveDiffCallback = saveCallback;
+		this.saveDiffCallback = null;
 		this.enable = true;
 
 		updateLastActiveState.call(this)
