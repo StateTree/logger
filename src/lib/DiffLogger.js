@@ -4,9 +4,9 @@ function shiftAndApplyLog(steps, callback) {
 	const {context, logList } = this;
 	const logEntry = logList.shiftPivot(steps);
 	const diffValue = logEntry.element;
-
+	const diffLoggerInstance = this;
 	context.setState.call(context, diffValue, function(){
-		updateLastActiveState.call(this);
+		updateLastActiveState.call(diffLoggerInstance);
 		callback()
 	});
 
@@ -17,7 +17,7 @@ function updateLastActiveState(){
 }
 
 export default class DiffLogger {
-	constructor(context,saveCallback, diffFunction){
+	constructor(context,saveCallback){
 		if(!context){
 			console.error("Context cant be null");
 		}
@@ -35,7 +35,6 @@ export default class DiffLogger {
 		}
 
 		this.context = context;
-		this.diffMethod = diffFunction;
 
 		this.logList = new PivotedLinkedList([]);
 		this.saveDiffCallback = saveCallback;
