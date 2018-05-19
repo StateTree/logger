@@ -3,8 +3,10 @@ import PivotedLinkedList from 'pivoted-linked-list';
 function shiftAndApplyLog(steps, callback) {
 	const {context, logList } = this;
 	const logEntry = logList.shiftPivot(steps);
-	const diffState = logEntry.element; //State as JSON
-	const diffValue = diffState ? diffState.value : undefined;
+	const forwardBackwardDiff = logEntry.element;
+	const {forward, backward} = forwardBackwardDiff;
+	const diffState = steps >= 0 ? forward : backward;//State as JSON
+	const diffValue = diffState.value ;
 	const diffLoggerInstance = this;
 	context.applyDiff.call(context, diffValue, function(){
 		updateLastActiveState.call(diffLoggerInstance);
@@ -15,6 +17,19 @@ function shiftAndApplyLog(steps, callback) {
 
 function updateLastActiveState(){
 	this.lastActiveState = this.context.getState();
+}
+
+function preInsert(log1, log2, log3){
+	if(log1 && log2 && log3){ // middle
+		const log1Forward = log1.forward;
+		const log2Forward = log2.forward;
+
+		log1.forward = log2.backward;
+		log2.forward = log3.backward;
+
+		log2.backward = log1Forward;
+		log3.backward = log2Forward;
+	}
 }
 
 export default class DiffLogger {
@@ -72,16 +87,17 @@ DiffLogger.prototype.redo = function(steps, callback){
 
 DiffLogger.prototype.save = function(){
 	if(this.enable){
-		let diffValue;
+		let forwardBackwardDiff;
 		if(this.context){
-			diffValue = this.context.getDiff(this.lastActiveState);
+			forwardBackwardDiff = this.context.getDiff(this.lastActiveState);
+			const {forward, backward} = forwardBackwardDiff;
 
-			if (diffValue !== undefined) { // Change occurred log them
-				this.logList.insert(diffValue);
+			if (typeof forward === "object" && typeof backward === "object") { // Change occurred log them
+				this.logList.insert(forwardBackwardDiff,preInsert);
 				updateLastActiveState.call(this)
 			}
 		}
-		this.saveDiffCallback && this.saveDiffCallback(diffValue);
+		this.saveDiffCallback && this.saveDiffCallback(forwardBackwardDiff);
 	}
 };
 
