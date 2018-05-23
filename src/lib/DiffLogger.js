@@ -89,7 +89,7 @@ DiffLogger.prototype.save = function(){
 	if(this.enable){
 		let forwardBackwardDiff;
 		if(this.context){
-			forwardBackwardDiff = this.context.getDiff(this.lastActiveState);
+			forwardBackwardDiff = this.context.getDiff(this.lastActiveState, true);
 			const {forward, backward} = forwardBackwardDiff;
 
 			if (typeof forward === "object" && typeof backward === "object") { // Change occurred log them
