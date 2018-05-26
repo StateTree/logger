@@ -23,15 +23,22 @@ function updateLastActiveState(){
 }
 
 function preInsert(log1, log2, log3){
+	let log1Forward, log2Forward;
 	if(log1 && log2 && log3){ // middle
-		const log1Forward = log1.forward;
-		const log2Forward = log2.forward;
+		log1Forward = log1.forward;
+		log2Forward = log2.forward;
 
 		log1.forward = log2.backward;
 		log2.forward = log3.backward;
 
 		log2.backward = log1Forward;
 		log3.backward = log2Forward;
+	} else if(log1, log2) { // last element
+		log1Forward = log1.forward;
+
+		log1.forward = log2.backward;
+		log2.backward = log1Forward;
+
 	}
 }
 
