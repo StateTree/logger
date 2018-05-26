@@ -7,8 +7,8 @@ function shiftAndApplyLog(steps, callback) {
 	const {context, logList } = this;
 	const logEntry = logList.shiftPivot(steps);
 	const forwardBackwardDiff = logEntry.element;
-	const {forward, backward} = forwardBackwardDiff;
-	const diffState = steps < 0 ? forward : backward;//State as JSON
+	const {forward} = forwardBackwardDiff;
+	const diffState = forward;//State as JSON
 	const diffValue = diffState.value ;
 	const diffLoggerInstance = this;
 	context.applyDiff.call(context, diffValue, function(){
