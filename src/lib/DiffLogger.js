@@ -22,24 +22,12 @@ function updateLastActiveState(){
 	this.lastActiveState = this.context.getState();
 }
 
-function preInsert(log1, log2, log3){
-	let log1Forward, log2Forward;
-	if(log1 && log2 && log3){ // middle
-
-		log1Forward = log1.element.forward;
-		log2Forward = log2.element.forward;
-
-		log1.element.forward = log2.element.backward;
-		log2.element.forward = log3.element.backward;
-
-		log2.element.backward = log1Forward;
-		log3.element.backward = log2Forward;
-	} else if(log1, log2) { // last element
-		log1Forward = log1.element.forward;
+function preInsert(log1, log2){
+	if(log1, log2) {
+		const log1Forward = log1.element.forward;
 
 		log1.element.forward = log2.element.backward;
 		log2.element.backward = log1Forward;
-
 	}
 }
 
