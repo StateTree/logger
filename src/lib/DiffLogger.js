@@ -1,22 +1,47 @@
 import PivotedLinkedList from 'pivoted-linked-list';
+import {combineDiff} from './helper';
 
-function shiftAndApplyLog(steps, callback) {
-	if(steps === 0){
-		return;
-	}
+function shiftAndApplyLog(steps,type, callback) {
 	const {context, logList } = this;
-	const logEntry = logList.shiftPivot(steps);
-	const forwardBackwardDiff = logEntry.element;
-	const {forward, backward} = forwardBackwardDiff;
-	let diffState;//State as JSON
-	if(steps < 0){
-		diffState = backward
-	} else if( steps > 0){
-		diffState = forward
+	let logEntry, baseDiff;
+	if(steps === 0){
+		logEntry = logList.pivot;
+		logList.shiftPivot(type === "undo" ? -1 : 1);
+		const forwardBackwardDiff = logEntry.element;
+		const {forward, backward} = forwardBackwardDiff;
+		let diffState;//State as JSON
+		if(type === "undo"){
+			diffState = backward
+		} else if( type === "redo"){
+			diffState = forward
+		}
+		baseDiff = diffState.value ;
+	} else {
+		if((type === "undo")){
+			steps = -steps;
+			while(steps >= 0){
+				logEntry = logList.pivot;
+				logList.shiftPivot(-1 );
+				const forwardBackwardDiff = logEntry.element;
+				const diffState = forwardBackwardDiff.backward;
+				const diffValue = diffState.value ;
+				baseDiff = combineDiff(baseDiff, diffValue);
+				steps = steps - 1;
+			}
+		} else {
+			while(steps > 0){
+				logEntry = logList.shiftPivot(1);
+				const forwardBackwardDiff = logEntry.element;
+				const diffState = forwardBackwardDiff.forward;
+				const diffValue = diffState.value ;
+				baseDiff = combineDiff(baseDiff, diffValue);
+				steps = steps - 1;
+			}
+		}
 	}
-	const diffValue = diffState.value ;
+
 	const diffLoggerInstance = this;
-	context.applyDiff.call(context, diffValue, function(){
+	context.applyDiff.call(context, baseDiff, function(){
 		updateLastActiveState.call(diffLoggerInstance);
 		callback()
 	});
@@ -25,15 +50,6 @@ function shiftAndApplyLog(steps, callback) {
 
 function updateLastActiveState(){
 	this.lastActiveState = this.context.getState();
-}
-
-function preInsert(log1, log2){
-	if(log1, log2) {
-		const log1Forward = log1.element.forward;
-
-		log1.element.forward = log2.element.backward;
-		log2.element.backward = log1Forward;
-	}
 }
 
 export default class DiffLogger {
@@ -77,14 +93,14 @@ DiffLogger.prototype.undo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	shiftAndApplyLog.call(this, -steps, callback);
+	shiftAndApplyLog.call(this, -steps, "undo", callback);
 };
 
 DiffLogger.prototype.redo = function(steps, callback){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	shiftAndApplyLog.call(this, steps, callback);
+	shiftAndApplyLog.call(this, steps, "redo", callback);
 };
 
 
@@ -97,7 +113,7 @@ DiffLogger.prototype.save = function(){
 			const {forward, backward} = forwardBackwardDiff;
 
 			if (typeof forward === "object" && typeof backward === "object") { // Change occurred log them
-				this.logList.insert(forwardBackwardDiff,preInsert);
+				this.logList.insert(forwardBackwardDiff);
 				updateLastActiveState.call(this)
 			}
 		}
