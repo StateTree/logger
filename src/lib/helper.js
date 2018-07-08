@@ -30,19 +30,22 @@ function arrayToObject(array , idName, replaceWithId = false, returnIds = false)
 	return object;
 }
 
+function isNotAnLoggableObject(obj){
+	return !(typeof (obj) === 'object' && (obj.hasOwnProperty('className') || obj.hasOwnProperty('id')))
+}
+
 export function combineDiff (baseDiff, diffToAdd) {
 	const baseType = typeof (baseDiff); // the type of null is 'object'
 	const diffType = typeof (diffToAdd);
 
-	// primitive values ie bottom most
-	if (baseDiff == null || diffToAdd == null || baseType !== diffType || baseType !== 'object') {
+
+	if (baseDiff == null || diffToAdd == null || baseType !== diffType || isNotAnLoggableObject(baseDiff)) {
 		baseDiff = diffType === 'object' ?  copyJson(diffToAdd) : diffToAdd // reached bottom most level
 	} else  {
 		const baseLookup = arrayToObject(baseDiff, 'id', true);
 		const arrayAsObj = arrayToObject(diffToAdd, 'id', false, true);
 		const diffLookUp = arrayAsObj.obj;
 		const diffToAddKeys = arrayAsObj.keys;
-
 
 		// apply each stateAsJson diff appearing in diffToAdd
 		for (let i = 0; i < diffToAddKeys.length; i++) {
