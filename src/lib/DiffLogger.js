@@ -1,7 +1,7 @@
 import PivotedLinkedList from 'pivoted-linked-list';
 import {combineDiff} from './helper';
 
-function shiftAndApplyLog(steps,type, callback) {
+function shiftAndApplyLog(steps,type, callback, objectVerifier) {
 	const {context, logList } = this;
 	let logEntry, baseDiff;
 	if(steps === 0){
@@ -89,18 +89,18 @@ DiffLogger.prototype.removeSaveCallback = function(){
 	this.saveDiffCallback = null;
 };
 
-DiffLogger.prototype.undo = function(steps, callback){
+DiffLogger.prototype.undo = function(steps, callback, objectVerifier){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	shiftAndApplyLog.call(this, -steps, "undo", callback);
+	shiftAndApplyLog.call(this, -steps, "undo", callback, objectVerifier);
 };
 
-DiffLogger.prototype.redo = function(steps, callback){
+DiffLogger.prototype.redo = function(steps, callback, objectVerifier){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	shiftAndApplyLog.call(this, steps, "redo", callback);
+	shiftAndApplyLog.call(this, steps, "redo", callback, objectVerifier);
 };
 
 
