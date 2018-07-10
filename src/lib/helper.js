@@ -30,16 +30,21 @@ function arrayToObject(array , idName, replaceWithId = false, returnIds = false)
 	return object;
 }
 
-function isNotAnLoggableObject(obj){
-	return !(typeof (obj) === 'object' && (obj.hasOwnProperty('className') || obj.hasOwnProperty('id')))
+function isLoggableObject(obj, loggableObjectClassName){
+	const className = obj['className'];
+	const isObjectWithClassNameProp = typeof (obj) === 'object' && className;
+
+	if(isObjectWithClassNameProp && loggableObjectClassName){
+		return className === loggableObjectClassName
+	}
+	return isObjectWithClassNameProp;
 }
 
-export function combineDiff (baseDiff, diffToAdd) {
+export function combineDiff (baseDiff, diffToAdd, loggableObjectClassName) {
 	const baseType = typeof (baseDiff); // the type of null is 'object'
 	const diffType = typeof (diffToAdd);
 
-
-	if (baseDiff == null || diffToAdd == null || baseType !== diffType || isNotAnLoggableObject(baseDiff)) {
+	if (baseDiff == null || diffToAdd == null || baseType !== diffType || (!isLoggableObject(baseDiff, loggableObjectClassName)) ) {
 		baseDiff = diffType === 'object' ?  copyJson(diffToAdd) : diffToAdd // reached bottom most level
 	} else  {
 		const baseLookup = arrayToObject(baseDiff, 'id', true);
