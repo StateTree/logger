@@ -30,21 +30,11 @@ function arrayToObject(array , idName, replaceWithId = false, returnIds = false)
 	return object;
 }
 
-function isLoggableObject(obj, loggableObjectClassName){
-	const className = obj['className'];
-	const isObjectWithClassNameProp = typeof (obj) === 'object' && className;
-
-	if(isObjectWithClassNameProp && loggableObjectClassName){
-		return className === loggableObjectClassName
-	}
-	return isObjectWithClassNameProp;
-}
-
-export function combineDiff (baseDiff, diffToAdd, loggableObjectClassName) {
+export function combineDiff (baseDiff, diffToAdd, objectVerifier, isCollectionObject = false) {
 	const baseType = typeof (baseDiff); // the type of null is 'object'
 	const diffType = typeof (diffToAdd);
 
-	if (baseDiff == null || diffToAdd == null || baseType !== diffType || (!isLoggableObject(baseDiff, loggableObjectClassName)) ) {
+	if (baseDiff == null || diffToAdd == null || baseType !== diffType || !isCollectionObject ) {
 		baseDiff = diffType === 'object' ?  copyJson(diffToAdd) : diffToAdd // reached bottom most level
 	} else  {
 		const baseLookup = arrayToObject(baseDiff, 'id', true);
@@ -64,7 +54,8 @@ export function combineDiff (baseDiff, diffToAdd, loggableObjectClassName) {
 						if (newState['className']!== oldState['className']) { // delete operation where classNames are not equal
 							baseLookup[id] = copyJson(newState);
 						} else {
-							oldState['value'] = combineDiff(oldState['value'], newState['value']);
+							const isCollectionObject = newState['className'] === objectVerifier;
+							oldState['value'] = combineDiff(oldState['value'], newState['value'],objectVerifier, isCollectionObject);
 						}
 					}
 				} else {
