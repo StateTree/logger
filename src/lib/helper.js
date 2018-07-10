@@ -51,10 +51,10 @@ export function combineDiff (baseDiff, diffToAdd, objectVerifier, isCollectionOb
 			if(oldState){
 				if (typeof oldState !== 'string') {
 					if(typeof newState !== 'string'){
-						if (newState['className']!== oldState['className']) { // delete operation where classNames are not equal
+						if (newState['classDefName']!== oldState['classDefName']) { // delete operation where classNames are not equal
 							baseLookup[id] = copyJson(newState);
 						} else {
-							const isCollectionObject = newState['className'] === objectVerifier;
+							const isCollectionObject = newState['classDefName'] === objectVerifier;
 							oldState['value'] = combineDiff(oldState['value'], newState['value'],objectVerifier, isCollectionObject);
 						}
 					}
