@@ -31,7 +31,6 @@
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
-    "diff": "git+http://github.com/StateTree/diff.git",
     "eslint": "^4.1.1",
     "eslint-loader": "^1.8.0",
     "fs-extra": "^3.0.1",
@@ -43,6 +42,7 @@
     "lib"
   ],
   "dependencies": {
-    "pivoted-linked-list": "git+https://github.com/StateTree/pivoted-linked-list.git"
+    "pivoted-linked-list": "git+https://github.com/StateTree/pivoted-linked-list.git",
+    "diff": "git+http://github.com/StateTree/diff.git",
   }
 }

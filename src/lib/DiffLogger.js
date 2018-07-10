@@ -25,7 +25,7 @@ function shiftAndApplyLog(steps,type, callback, objectVerifier) {
 				const forwardBackwardDiff = logEntry.element;
 				const diffState = forwardBackwardDiff.backward;
 				const diffValue = diffState.value ;
-				baseDiff = combineDiff(baseDiff, diffValue);
+				baseDiff = combineDiff(baseDiff, diffValue, objectVerifier);
 				steps = steps - 1;
 			}
 		} else {
