@@ -1,6 +1,6 @@
 {
   "name": "logger",
-  "version": "3.10.4",
+  "version": "3.11.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -43,7 +43,7 @@
     "lib"
   ],
   "dependencies": {
-    "pivoted-linked-list": "git+https://github.com/StateTree/pivoted-linked-list.git",
-    "diff": "git+http://github.com/StateTree/diff.git"
+    "diff": "git+http://github.com/StateTree/diff.git",
+    "pivoted-linked-list": "git+https://github.com/StateTree/pivoted-linked-list.git"
   }
 }

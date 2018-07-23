@@ -1,10 +1,44 @@
 import PivotedLinkedList from 'pivoted-linked-list';
 import {combineDiff} from './helper';
 
+function preInsert(currentLog, newLog, nextLog){
+	if(currentLog, newLog, nextLog) { // middle insert
+		const newLogForwardDiff = newLog.forward;
+		const newLogBackwardDiff = newLog.backward;
+		const nextLogForwardDiff = nextLog.forward;
+		const nextLogBackwardDiff = nextLog.backward;
+		const newCombinedForwardDiff = combineDiff(nextLogBackwardDiff.value, newLogForwardDiff.value)
+		const newCombinedBackwardDiff = combineDiff(nextLogForwardDiff.value, newLogBackwardDiff.value)
+
+		newLog.forward = newCombinedForwardDiff;
+		newLog.backward = newCombinedBackwardDiff;
+	}
+
+}
+
+function jump(steps,direction, logList,objectVerifier){
+	let logEntry, baseDiff;
+	while(steps >= 0){
+		logEntry = logList.pivot;
+		if(direction === 'backward'){
+			logList.shiftPivot(-1);
+		} else if(direction === 'forward'){
+			logList.shiftPivot(1);
+		}
+		const forwardBackwardDiff = logEntry.element;
+		const diffState = forwardBackwardDiff[direction];
+		const diffValue = diffState.value ;
+		const isLoggableCollectionObject = diffState['classDefName'] === objectVerifier;
+		baseDiff = combineDiff(baseDiff, diffValue, objectVerifier, isLoggableCollectionObject);
+		steps = steps - 1;
+	}
+	return baseDiff;
+}
+
 function shiftAndApplyLog(steps,type, callback, objectVerifier) {
 	const {context, logList } = this;
 	let logEntry, baseDiff;
-	if(steps === 0){
+	if(steps === 0){ // next and prev
 		logEntry = logList.pivot;
 		logList.shiftPivot(type === "undo" ? -1 : 1);
 		const forwardBackwardDiff = logEntry.element;
@@ -16,28 +50,11 @@ function shiftAndApplyLog(steps,type, callback, objectVerifier) {
 			diffState = forward
 		}
 		baseDiff = diffState.value ;
-	} else {
+	} else { // jumping
 		if((type === "undo")){
-			steps = -steps;
-			while(steps >= 0){
-				logEntry = logList.pivot;
-				logList.shiftPivot(-1 );
-				const forwardBackwardDiff = logEntry.element;
-				const diffState = forwardBackwardDiff.backward;
-				const diffValue = diffState.value ;
-				const isLoggableCollectionObject = diffState['classDefName'] === objectVerifier;
-				baseDiff = combineDiff(baseDiff, diffValue, objectVerifier, isLoggableCollectionObject);
-				steps = steps - 1;
-			}
+			baseDiff = jump(-steps,'backward',logList,objectVerifier);
 		} else {
-			while(steps > 0){
-				logEntry = logList.shiftPivot(1);
-				const forwardBackwardDiff = logEntry.element;
-				const diffState = forwardBackwardDiff.forward;
-				const diffValue = diffState.value ;
-				baseDiff = combineDiff(baseDiff, diffValue);
-				steps = steps - 1;
-			}
+			baseDiff = jump(steps,'forward',logList,objectVerifier);
 		}
 	}
 
@@ -105,7 +122,6 @@ DiffLogger.prototype.redo = function(steps, callback, objectVerifier){
 };
 
 
-
 DiffLogger.prototype.save = function(){
 	if(this.enable){
 		let forwardBackwardDiff;
@@ -114,7 +130,7 @@ DiffLogger.prototype.save = function(){
 			const {forward, backward} = forwardBackwardDiff;
 
 			if (typeof forward === "object" && typeof backward === "object") { // Change occurred log them
-				this.logList.insert(forwardBackwardDiff);
+				this.logList.insert(forwardBackwardDiff, preInsert);
 				updateLastActiveState.call(this)
 			}
 		}
@@ -129,5 +145,9 @@ DiffLogger.prototype.getCurrentLog = function(){
 	}
 	return null;
 };
+
+DiffLogger.prototype.clear = function(){
+	this.logList.reset();
+}
 
 
