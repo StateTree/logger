@@ -18,12 +18,12 @@ function preInsert(currentLog, newLog, nextLog){
 
 function jump(steps,direction, logList,objectVerifier){
 	let logEntry, baseDiff;
-	while(steps >= 0){
-		logEntry = logList.pivot;
+	while(steps > 0){
 		if(direction === 'backward'){
+			logEntry = logList.pivot;
 			logList.shiftPivot(-1);
 		} else if(direction === 'forward'){
-			logList.shiftPivot(1);
+			logEntry = logList.shiftPivot(1);
 		}
 		const forwardBackwardDiff = logEntry.element;
 		const diffState = forwardBackwardDiff[direction];
@@ -41,24 +41,10 @@ function shiftAndApplyLog(steps,type, callback, objectVerifier) {
 		this.objectVerifier = objectVerifier;
 	}
 	let logEntry, baseDiff;
-	if(steps === 0){ // next and prev
-		logEntry = logList.pivot;
-		logList.shiftPivot(type === "undo" ? -1 : 1);
-		const forwardBackwardDiff = logEntry.element;
-		const {forward, backward} = forwardBackwardDiff;
-		let diffState;//State as JSON
-		if(type === "undo"){
-			diffState = backward
-		} else if( type === "redo"){
-			diffState = forward
-		}
-		baseDiff = diffState.value ;
-	} else { // jumping
-		if((type === "undo")){
-			baseDiff = jump(-steps,'backward',logList,objectVerifier);
-		} else {
-			baseDiff = jump(steps,'forward',logList,objectVerifier);
-		}
+	if((type === "undo")){
+		baseDiff = jump(-steps,'backward',logList,objectVerifier);
+	} else {
+		baseDiff = jump(steps,'forward',logList,objectVerifier);
 	}
 
 	const diffLoggerInstance = this;
