@@ -7,8 +7,8 @@ function preInsert(currentLog, newLog, nextLog){
 		const newLogBackwardDiff = newLog.element.backward;
 		const nextLogForwardDiff = nextLog.element.forward;
 		const nextLogBackwardDiff = nextLog.element.backward;
-		const newCombinedForwardDiff = combineDiff(nextLogBackwardDiff.value, newLogForwardDiff.value)
-		const newCombinedBackwardDiff = combineDiff(nextLogForwardDiff.value, newLogBackwardDiff.value)
+		const newCombinedForwardDiff = combineDiff(nextLogBackwardDiff.value, newLogForwardDiff.value, this.objectVerifier, true)
+		const newCombinedBackwardDiff = combineDiff(nextLogForwardDiff.value, newLogBackwardDiff.value, this.objectVerifier, true)
 
 		newLog.forward = newCombinedForwardDiff;
 		newLog.backward = newCombinedBackwardDiff;
@@ -37,6 +37,9 @@ function jump(steps,direction, logList,objectVerifier){
 
 function shiftAndApplyLog(steps,type, callback, objectVerifier) {
 	const {context, logList } = this;
+	if(objectVerifier){
+		this.objectVerifier = objectVerifier;
+	}
 	let logEntry, baseDiff;
 	if(steps === 0){ // next and prev
 		logEntry = logList.pivot;
@@ -71,7 +74,7 @@ function updateLastActiveState(){
 }
 
 export default class DiffLogger {
-	constructor(context){
+	constructor(context, objectVerifier){
 		if(!context){
 			console.error("Context cant be null");
 		}
@@ -93,8 +96,11 @@ export default class DiffLogger {
 		this.logList = new PivotedLinkedList([]);
 		this.saveDiffCallback = null;
 		this.enable = true;
+		this.objectVerifier = objectVerifier;
 
 		updateLastActiveState.call(this)
+		this.objectVerifier;
+		preInsert = preInsert.bind(this);
 	}
 }
 
