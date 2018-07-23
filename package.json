@@ -42,7 +42,7 @@
     "lib"
   ],
   "dependencies": {
-    "pivoted-linked-list": "git+https://github.com/StateTree/pivoted-linked-list.git",
-    "diff": "git+http://github.com/StateTree/diff.git"
+    "diff": "git+http://github.com/StateTree/diff.git",
+    "pivoted-linked-list": "git+https://github.com/StateTree/pivoted-linked-list.git"
   }
 }
