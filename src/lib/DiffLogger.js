@@ -3,10 +3,10 @@ import {combineDiff} from './helper';
 
 function preInsert(currentLog, newLog, nextLog){
 	if(currentLog, newLog, nextLog) { // middle insert
-		const newLogForwardDiff = newLog.forward;
-		const newLogBackwardDiff = newLog.backward;
-		const nextLogForwardDiff = nextLog.forward;
-		const nextLogBackwardDiff = nextLog.backward;
+		const newLogForwardDiff = newLog.element.forward;
+		const newLogBackwardDiff = newLog.element.backward;
+		const nextLogForwardDiff = nextLog.element.forward;
+		const nextLogBackwardDiff = nextLog.element.backward;
 		const newCombinedForwardDiff = combineDiff(nextLogBackwardDiff.value, newLogForwardDiff.value)
 		const newCombinedBackwardDiff = combineDiff(nextLogForwardDiff.value, newLogBackwardDiff.value)
 
