@@ -1,9 +1,10 @@
-import diff from 'diff';
+import diff from '@statetree/diff';
 import Logger from './../lib';
 import {DiffLogger} from './../lib';
 
 var obj = {
 	value: 0,
+	id: "hi",
 	getState: function(){
 		return this.value;
 	},
@@ -13,18 +14,45 @@ var obj = {
 	applyDiff: function(val){
 		this.value = val;
 	},
+	asJson:function (value, isDelete, onlyValue) {
+		value = value === undefined ? this.getState() : value;
+		if (onlyValue) {
+			return value;
+		}
+		const json = {id: "hi"};
+		json['classDefName'] = isDelete ? undefined : this.classDefName;
+		json['displayName'] = isDelete ? undefined : this.displayName;
+		json['value'] = isDelete ? undefined : value;
+		return json;
+	},
 	getDiff: function(value){
-		return diff(value,this.getState())
+
+		const currentValue = this.getState();
+
+
+		const diffvalue = diff(value, currentValue)
+
+		if(diffvalue !== undefined){
+			return {
+				forward:this.asJson(currentValue),
+				backward:this.asJson(value)
+			};
+		} else {
+			return {
+				forward:this.id,
+				backward:this.id
+			};
+		}
 	}
 }
-
 
 
 function saveCallback(log){
 	console.log(log)
 }
 
-var logger = new DiffLogger(obj,saveCallback);
+var logger = new DiffLogger(obj);
+logger.setSaveCallback(saveCallback)
 
 
 obj.setState(1);
@@ -79,36 +107,122 @@ logger.redo();
 console.log('After redo: ', obj.value);
 
 
+console.log('----------------------------------------')
+var obj = {
+	value: {
+		one: 1,
+		two: 2
+	},
+	getState: function(){
+		return {...this.value};
+	},
 
-/*
- console.log('Before Undo 2 Steps: ', obj.value);
+	setState: function(key, val){
+		this.value[key] = val;
+	},
 
-logger.undo(2);
+	applyDiff: function(val){
+		this.value = val;
+	}
+}
+
+
+var logger = new Logger(obj.getState());
+logger.setSaveCallback(saveCallback)
+
+obj.setState('three', 3);
+logger.save(obj.getState());
+
+obj.setState('four' ,4);
+logger.save(obj.getState());
+
+obj.setState('five' ,5);
+logger.save(obj.getState());
+
+
+let log;
+log = logger.undo();
+obj.applyDiff(log);
+console.log('After 1 Undo: ', obj.value);
+
+log =  logger.undo();
+obj.applyDiff(log);
+console.log('After 2 Undo: ', obj.value);
+
+
+log =  logger.redo();
+obj.applyDiff(log);
+console.log('After 1 redo: ', obj.value);
+
+log =  logger.redo();
+obj.applyDiff(log);
+console.log('After 2 redo: ', obj.value);
+
+
+log =  logger.undo(2);
+obj.applyDiff(log);
 console.log('After Undo 2 Steps: ', obj.value);
-logger.redo(2);
+
+log =  logger.redo(2);
+obj.applyDiff(log);
 console.log('After Redo 2 Steps: ', obj.value);
 
-logger.undo(2);
-console.log('After Undo 2 Steps: ', obj.value);
+obj.setState('six' , 6);
+logger.save(obj.getState());
 
-obj.setValue(6);
-logger.save(true);
+log =  logger.undo();
+obj.applyDiff(log);
+console.log('After Undo: ', obj.value);
 
-obj.setValue(7);
-logger.save(true);
-
-logger.undo();
-console.log('After Undo 1 Steps: ', obj.value);*/
-
+log =  logger.redo();
+obj.applyDiff(log);
+console.log('After redo: ', obj.value);
 
 
+obj.setState('six' , 66);
+logger.save(obj.getState());
 
-/*logger.undo(7);
-console.log('After Undo 7 Steps more than available steps: ', obj.value);
-logger.redo(2);
-console.log('After Redo 2 Steps: ', obj.value);
-logger.redo(7);
-console.log('After Redo 7 Steps more than available steps: ', obj.value);*/
+log =  logger.undo();
+obj.applyDiff(log);
+console.log('After Undo: ', obj.value);
+
+log =  logger.redo();
+obj.applyDiff(log);
+console.log('After redo: ', obj.value);
+
+obj.setState('six' , {
+	num: 6
+});
+logger.save(obj.getState());
+
+log =  logger.undo();
+obj.applyDiff(log);
+console.log('After Undo: ', obj.value);
+
+log =  logger.redo();
+obj.applyDiff(log);
+console.log('After redo: ', obj.value);
+
+obj.setState('six' , {
+	num: 66
+});
+obj.setState('five' , {
+	num: 55
+});
+logger.save(obj.getState());
+
+log =  logger.undo();
+obj.applyDiff(log);
+console.log('After Undo: ', obj.value);
+
+log =  logger.redo();
+obj.applyDiff(log);
+console.log('After redo: ', obj.value);
+
+
+
+
+
 
 
 

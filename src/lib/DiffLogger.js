@@ -1,5 +1,5 @@
 import PivotedLinkedList from 'pivoted-linked-list';
-import {combineDiff} from './helper';
+import {combineDiffLogs} from './helper';
 
 function preInsert(currentLog, newLog, nextLog){
 	if(currentLog, newLog, nextLog) { // middle insert
@@ -7,8 +7,8 @@ function preInsert(currentLog, newLog, nextLog){
 		const newLogBackwardDiff = newLog.element.backward;
 		const nextLogForwardDiff = nextLog.element.forward;
 		const nextLogBackwardDiff = nextLog.element.backward;
-		const newCombinedForwardDiff = combineDiff(nextLogBackwardDiff.value, newLogForwardDiff.value, this.objectVerifier, true)
-		const newCombinedBackwardDiff = combineDiff(nextLogForwardDiff.value, newLogBackwardDiff.value, this.objectVerifier, true)
+		const newCombinedForwardDiff = combineDiffLogs(nextLogBackwardDiff.value, newLogForwardDiff.value, this.objectVerifier, true)
+		const newCombinedBackwardDiff = combineDiffLogs(nextLogForwardDiff.value, newLogBackwardDiff.value, this.objectVerifier, true)
 
 		newLog.forward = newCombinedForwardDiff;
 		newLog.backward = newCombinedBackwardDiff;
@@ -29,7 +29,7 @@ function jump(steps,direction, logList,objectVerifier){
 		const diffState = forwardBackwardDiff[direction];
 		const diffValue = diffState.value ;
 		const isLoggableCollectionObject = diffState['classDefName'] === objectVerifier;
-		baseDiff = combineDiff(baseDiff, diffValue, objectVerifier, isLoggableCollectionObject);
+		baseDiff = combineDiffLogs(baseDiff, diffValue, objectVerifier, isLoggableCollectionObject);
 		steps = steps - 1;
 	}
 	return baseDiff;

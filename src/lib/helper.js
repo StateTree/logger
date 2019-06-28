@@ -30,7 +30,7 @@ function arrayToObject(array , idName, replaceWithId = false, returnIds = false)
 	return object;
 }
 
-export function combineDiff (baseDiff, diffToAdd, objectVerifier, isCollectionObject = false) {
+export function combineDiffLogs (baseDiff, diffToAdd, objectVerifier, isCollectionObject = false) {
 	const baseType = typeof (baseDiff); // the type of null is 'object'
 	const diffType = typeof (diffToAdd);
 
@@ -67,6 +67,7 @@ export function combineDiff (baseDiff, diffToAdd, objectVerifier, isCollectionOb
 			}
 
 		}
+
 		// change baseDiff back from names to typed states
 		for (let i = 0; i < baseDiff.length; i++) {
 			baseDiff[i] = baseLookup[baseDiff[i]];
@@ -76,3 +77,29 @@ export function combineDiff (baseDiff, diffToAdd, objectVerifier, isCollectionOb
 
 	return baseDiff;
 };
+
+export function deepClone(source){
+	if (typeof source !== 'object' || source === null) {
+		return source
+	}
+	if (Array.isArray(source)) {
+		return deepArray(source)
+	}
+	return deepObject(source)
+}
+
+function deepArray(source){
+	return source.map((value) => {
+		return deepClone(value)
+	})
+}
+
+function deepObject(source){
+	const result = {}
+	Object.keys(source).forEach((key) => {
+		const value = source[key]
+		result[key] = deepClone(value)
+	}, {})
+	return result
+
+}

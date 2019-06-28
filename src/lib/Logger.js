@@ -1,75 +1,56 @@
-import diff from 'diff';
-import LogEntry from './LogEntry';
+import PivotedLinkedList from 'pivoted-linked-list';
+import {deepClone} from './helper';
+import {getDiff, combineDiff, applyDiff} from '@statetree/diff';
 
-function applyDiff(steps, callback) {
-	const {context, undoLog, redoLog, getter, setter} = this;
-	let { prevState } = this;
-	const absSteps = Math.abs(steps);
-	let stepsRemaining = Math.min(absSteps, steps < 0 ? undoLog.length : redoLog.length);
-	if (stepsRemaining > 0) {
-		let logEntry, diff;
-		while (stepsRemaining-- > 0) {
-			if (steps < 0) { // undo
-				logEntry = undoLog.pop();
-				redoLog.unshift(logEntry);
-				diff = logEntry.prev;
-			} else { //redo
-				logEntry = redoLog.shift();
-				undoLog.push(logEntry);
-				diff = logEntry.next;
-			}
+function preInsert(currentLog, newLog, nextLog){
+	if(currentLog, newLog, nextLog) { // middle insert
+		const newLogForwardDiff = newLog.element.forward;
+		const newLogBackwardDiff = newLog.element.backward;
+		const nextLogForwardDiff = nextLog.element.forward;
+		const nextLogBackwardDiff = nextLog.element.backward;
+		const newCombinedForwardDiff = combineDiff(nextLogBackwardDiff, newLogForwardDiff)
+		const newCombinedBackwardDiff = combineDiff(nextLogForwardDiff, newLogBackwardDiff)
 
-			if (stepsRemaining === 0) {
-				this.prevState = diff.value;
-			}
-		}
-		// since primitive are immutable we don't call them in spread declaration above
-		this.diffApplied = true;
-		// now after reaching the Log entry apply the diff to current state
-		setter.call(context, diff, callback);
-	} else {
-		// since primitive are immutable we don't call them in spread declaration above
-		this.diffApplied = false;
-	}
-
-};
-
-export default class Logger {
-	constructor(saveCallback){
-		this.context;
-		this.getter;
-		this.setter;
-		this.diffMethod;
-
-		this.undoLog = [];
-		this.redoLog = [];
-
-		this.prevState = null;
-		this.nextId = 0;
-
-		this.saveDiffCallback = saveCallback;
-
-		this.diffApplied = false;
-		this.enable = true;
+		newLog.forward = newCombinedForwardDiff;
+		newLog.backward = newCombinedBackwardDiff;
 	}
 }
 
-Logger.prototype.setContext = function(context, getter, setter, diffMethod){
-	if(!getter){
-		console.warn('Context getter function is required');
-		return;
+function jump(steps, direction, logList){
+	let logEntry, baseDiff;
+	while(steps > 0){
+		if(direction === 'backward'){
+			logEntry = logList.pivot;
+			logList.shiftPivot(-1);
+		} else if(direction === 'forward'){
+			logEntry = logList.shiftPivot(1);
+		}
+		const forwardBackwardDiff = logEntry.element;
+		const diffToAdd = forwardBackwardDiff[direction];
+		baseDiff = combineDiff(baseDiff, diffToAdd);
+		steps = steps - 1;
 	}
+	return baseDiff
+}
 
-	if(!setter){
-		console.warn('Context setter function is required');
-		return;
+function getLog(logList, steps, type) {
+	if((type === "undo")){
+		return jump(-steps,'backward',logList);
+	} else {
+		return jump(steps,'forward',logList);
 	}
-	this.context = context;
-	this.getter = getter;
-	this.setter = setter;
-	this.diffMethod = diffMethod;
-	this.prevState = getter.call(context);
 };
+
+export default class Logger {
+	constructor(initialState, isCopy = false){
+		this.logList = new PivotedLinkedList([]);
+		this.saveDiffCallback = null;
+		this.enable = true;
+
+		this.lastActiveState = isCopy ? initialState : deepClone(initialState);
+	}
+}
+
 
 Logger.prototype.setSaveCallback = function(saveCallback){
 	this.saveDiffCallback = saveCallback
@@ -79,45 +60,50 @@ Logger.prototype.removeSaveCallback = function(){
 	this.saveDiffCallback = null;
 };
 
-Logger.prototype.undo = function(steps, callback){
+Logger.prototype.undo = function(steps){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	applyDiff.call(this, -steps, callback);
+	const diffState = getLog(this.logList, -steps, "undo");
+	const activeState = applyDiff(this.lastActiveState, diffState);
+	this.lastActiveState = activeState;
+	return deepClone(activeState);
 };
 
-Logger.prototype.redo = function(steps, callback){
+Logger.prototype.redo = function(steps){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	applyDiff.call(this, steps, callback);
+	const diffState =  getLog(this.logList, steps, "redo");
+	const activeState = applyDiff(this.lastActiveState, diffState);
+	this.lastActiveState = activeState;
+	return deepClone(activeState);
 };
 
-Logger.prototype.save = function(){
-	if(this.diffApplied){
-		this.diffApplied = false;
-		return;
-	}
 
+Logger.prototype.save = function(newState){
 	if(this.enable){
-		let log;
-		let getDiff = this.diffMethod ? this.diffMethod : diff;
-		if(this.context){
-			const state = this.getter.call(this.context);
-			const diffObject = getDiff(this.prevState, state);
-			// Change occurred log them
-			if (diffObject.current !== undefined) {
-				log = new LogEntry(this.nextId++, diffObject.current, diffObject.prev);
-				if(this.redoLog.length !== 0){
-					const nextLog = this.redoLog[0];
-					nextLog.prev = log.next;
-				}
-				this.undoLog.push(log);
-				this.prevState = state;
-			}
+		let forwardBackwardDiff = getDiff(this.lastActiveState, newState);
+		const {forward, backward} = forwardBackwardDiff;
+
+		if (typeof forward === "object" && typeof backward === "object") { // Change occurred log them
+			this.logList.insert(forwardBackwardDiff, preInsert);
+			this.lastActiveState = deepClone(newState);
 		}
-		this.saveDiffCallback && this.saveDiffCallback(log);
+		this.saveDiffCallback && this.saveDiffCallback(forwardBackwardDiff);
 	}
 };
+
+
+Logger.prototype.getCurrentLog = function(){
+	if(this.logList ){
+		return this.logList.getPivotElement();
+	}
+	return null;
+};
+
+Logger.prototype.clear = function(){
+	this.logList.reset();
+}
 
 
