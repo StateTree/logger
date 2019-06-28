@@ -55,7 +55,7 @@ export function combineDiffLogs (baseDiff, diffToAdd, objectVerifier, isCollecti
 							baseLookup[id] = copyJson(newState);
 						} else {
 							const isCollectionObject = newState['classDefName'] === objectVerifier;
-							oldState['value'] = combineDiff(oldState['value'], newState['value'],objectVerifier, isCollectionObject);
+							oldState['value'] = combineDiffLogs(oldState['value'], newState['value'],objectVerifier, isCollectionObject);
 						}
 					}
 				} else {
