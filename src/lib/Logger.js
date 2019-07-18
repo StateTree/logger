@@ -1,6 +1,6 @@
 import PivotedLinkedList from 'pivoted-linked-list';
 import {deepClone} from './helper';
-import {getDiff, combineDiff, applyDiff} from '@statetree/diff';
+import {getObjectDiff, combineDiff, applyDiff} from '@statetree/diff';
 
 function preInsert(currentLog, newLog, nextLog){
 	if(currentLog, newLog, nextLog) { // middle insert
@@ -17,7 +17,7 @@ function preInsert(currentLog, newLog, nextLog){
 }
 
 function jump(steps, direction, logList){
-	let logEntry, baseDiff;
+	let logEntry, baseDiff = {};
 	while(steps > 0){
 		if(direction === 'backward'){
 			logEntry = logList.pivot;
@@ -25,9 +25,7 @@ function jump(steps, direction, logList){
 		} else if(direction === 'forward'){
 			logEntry = logList.shiftPivot(1);
 		}
-		const forwardBackwardDiff = logEntry.element;
-		const diffToAdd = forwardBackwardDiff[direction];
-		baseDiff = combineDiff(baseDiff, diffToAdd);
+		baseDiff = combineDiff(baseDiff, logEntry.element);
 		steps = steps - 1;
 	}
 	return baseDiff
@@ -42,11 +40,17 @@ function getLog(logList, steps, type) {
 };
 
 export default class Logger {
-	constructor(initialState, isCopy = false){
+	constructor(context, isCopy = false){
 		this.logList = new PivotedLinkedList([]);
 		this.saveDiffCallback = null;
 		this.enable = true;
-
+		let initialState;
+		if(context && context.getState && context.applyDiff){
+			this.context = context;
+			initialState = context.getState();
+		} else  {
+			initialState = context;
+		}
 		this.lastActiveState = isCopy ? initialState : deepClone(initialState);
 	}
 }
@@ -64,8 +68,16 @@ Logger.prototype.undo = function(steps){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	const diffState = getLog(this.logList, -steps, "undo");
-	const activeState = applyDiff(this.lastActiveState, diffState);
+	const forwardBackwardDiff = getLog(this.logList, -steps, "undo");
+	const diffState = forwardBackwardDiff['backward'];
+
+	let activeState;
+	if(this.context){
+		activeState = applyDiff(diffState);
+	} else {
+		activeState = applyDiff(this.lastActiveState, diffState);
+	}
+
 	this.lastActiveState = activeState;
 	return deepClone(activeState);
 };
@@ -74,8 +86,15 @@ Logger.prototype.redo = function(steps){
 	if (isNaN(steps)) {
 		steps = 1;
 	}
-	const diffState =  getLog(this.logList, steps, "redo");
-	const activeState = applyDiff(this.lastActiveState, diffState);
+	const forwardBackwardDiff =  getLog(this.logList, steps, "redo");
+	const diffState = forwardBackwardDiff['forward'];
+
+	let activeState;
+	if(this.context){
+		activeState = applyDiff(diffState);
+	} else {
+		activeState = applyDiff(this.lastActiveState, diffState);
+	}
 	this.lastActiveState = activeState;
 	return deepClone(activeState);
 };
@@ -83,7 +102,7 @@ Logger.prototype.redo = function(steps){
 
 Logger.prototype.save = function(newState){
 	if(this.enable){
-		let forwardBackwardDiff = getDiff(this.lastActiveState, newState);
+		let forwardBackwardDiff = getObjectDiff(this.lastActiveState, newState);
 		const {forward, backward} = forwardBackwardDiff;
 
 		if (typeof forward === "object" && typeof backward === "object") { // Change occurred log them
