@@ -72,8 +72,8 @@ Logger.prototype.undo = function(steps){
 	const diffState = forwardBackwardDiff['backward'];
 
 	let activeState;
-	if(this.context){
-		activeState = applyDiff(diffState);
+	if(this.context && this.context.applyDiff){
+		activeState = this.context.applyDiff(diffState);
 	} else {
 		activeState = applyDiff(this.lastActiveState, diffState);
 	}
@@ -90,8 +90,8 @@ Logger.prototype.redo = function(steps){
 	const diffState = forwardBackwardDiff['forward'];
 
 	let activeState;
-	if(this.context){
-		activeState = applyDiff(diffState);
+	if(this.context && this.context.applyDiff){
+		activeState = this.context.applyDiff(diffState);
 	} else {
 		activeState = applyDiff(this.lastActiveState, diffState);
 	}
